@@ -38,7 +38,7 @@ impl Tensor {
         self.data[idx*c+idx+cutoff*c*c] as f64/d
     }
 
-    fn find_one_winner(&self, already_elected: &[u32]) -> u32 {
+    fn find_one_winner(&self, already_elected: &[u32], seats: u32) -> u32 {
         let c = self.candidates as usize;
         assert!(5*c*c == self.data.len());
         let mut idx = vec![];
@@ -85,7 +85,7 @@ impl Tensor {
         assert!(seats <= self.candidates);
         let mut w = vec![];
         for _ in 0..seats {
-            w.push(self.find_one_winner(&w));
+            w.push(self.find_one_winner(&w, seats));
         }
         w
     }

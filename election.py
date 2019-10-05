@@ -13,13 +13,14 @@ class Tensor(object):
                 for k in range(5):
                     if ballot[i] > k and ballot[j] > k:
                         self.data[i*c+j+k*c*c] += 1
+        self.votes += 1
     
     def get(self, idx, already_elected, cutoff):
         c = self.candidates
         idx_votes = self.data[idx*c+idx+cutoff*c*c]
         if idx_votes == 0:
             return 0.0
-        d = 0.0
+        d = 1.0
         for i in already_elected:
             i_votes = self.data[i*c+i+cutoff*c*c]
             if i_votes == 0:
@@ -27,9 +28,9 @@ class Tensor(object):
             d += 1.0 * self.data[idx*c+i+cutoff*c*c] / i_votes
         return idx_votes / d
     
-    def find_one_winner(self, already_elected):
+    def find_one_winner(self, already_elected, seats):
         idx = []
-        q = 1.0 * self.votes / self.seats
+        q = 1.0 * self.votes / seats
         for cutoff in range(4, -1, -1):
             val = -1.0
             for i in range(self.candidates):
@@ -43,7 +44,7 @@ class Tensor(object):
                         val = cur
                         idx = [i]
             if idx:
-                for i in range(cutoff):
+                for i in range(cutoff - 1, -1, -1):
                     if len(idx) == 1:
                         break
                     idx2 = []
@@ -62,7 +63,7 @@ class Tensor(object):
     def find_winners(self, seats):
         w = []
         for i in range(seats):
-            w.append(self.find_one_winner(w))
+            w.append(self.find_one_winner(w, seats))
         return w
 
 t = Tensor(3)
