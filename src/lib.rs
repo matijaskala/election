@@ -9,7 +9,7 @@ pub fn new_tensor(c: u32) -> Tensor {
 }
 
 impl Tensor {
-    pub fn add(&mut self, ballot: &[u8]) {
+    pub fn add_ballot(&mut self, ballot: &[u8]) {
         let c = self.candidates as usize;
         assert!(5*c*c == self.data.len());
         assert!(c == ballot.len());
@@ -25,7 +25,7 @@ impl Tensor {
         self.votes += 1;
     }
 
-    fn get(&self, idx: usize, already_elected: &[u32], cutoff: usize) -> f64 {
+    fn get_score(&self, idx: usize, already_elected: &[u32], cutoff: usize) -> f64 {
         let c = self.candidates as usize;
         assert!(5*c*c == self.data.len());
         if self.data[idx*c+idx+cutoff*c*c] == 0 { return 0.0 }
@@ -38,7 +38,7 @@ impl Tensor {
         self.data[idx*c+idx+cutoff*c*c] as f64/d
     }
 
-    fn find_one_winner(&self, already_elected: &[u32], seats: u32) -> u32 {
+    fn get_next_winner(&self, already_elected: &[u32], seats: u32) -> u32 {
         let c = self.candidates as usize;
         assert!(5*c*c == self.data.len());
         let mut idx = vec![];
@@ -50,8 +50,8 @@ impl Tensor {
                 for j in already_elected {
                     if i == *j as usize { skip = true }
                 }
-                if !skip && (cutoff == 0 || self.get(i, already_elected, cutoff - 1) >= q) {
-                    let cur = self.get(i, already_elected, cutoff);
+                if !skip && (cutoff == 0 || self.get_score(i, already_elected, cutoff - 1) >= q) {
+                    let cur = self.get_score(i, already_elected, cutoff);
                     if val == cur { idx.push(i) }
                     else if val < cur {
                         val = cur;
@@ -60,12 +60,12 @@ impl Tensor {
                 }
             }
             if idx.len() != 0 {
-                for i in (0..cutoff).rev() {
+                for i in cutoff+1..5 {
                     if idx.len() == 1 { break }
                     let mut idx2 = vec![];
                     let mut val = -1.0;
                     for j in idx {
-                        let cur = self.get(j, already_elected, i);
+                        let cur = self.get_score(j, already_elected, i);
                         if val == cur { idx2.push(j) }
                         else if val < cur {
                             val = cur;
@@ -81,11 +81,11 @@ impl Tensor {
         idx[0] as u32
     }
 
-    pub fn find_winners(&self, seats: u32) -> Vec<u32> {
+    pub fn get_winners(&self, seats: u32) -> Vec<u32> {
         assert!(seats <= self.candidates);
         let mut w = vec![];
         for _ in 0..seats {
-            w.push(self.find_one_winner(&w, seats));
+            w.push(self.get_next_winner(&w, seats));
         }
         w
     }

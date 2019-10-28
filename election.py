@@ -6,7 +6,7 @@ class Tensor(object):
         self.data = [0] * (5*c*c)
         self.votes = 0
     
-    def add(self, ballot):
+    def add_ballot(self, ballot):
         c = self.candidates
         for i in range(c):
             for j in range(c):
@@ -15,7 +15,7 @@ class Tensor(object):
                         self.data[i*c+j+k*c*c] += 1
         self.votes += 1
     
-    def get(self, idx, already_elected, cutoff):
+    def get_score(self, idx, already_elected, cutoff):
         c = self.candidates
         idx_votes = self.data[idx*c+idx+cutoff*c*c]
         if idx_votes == 0:
@@ -28,7 +28,7 @@ class Tensor(object):
             d += 1.0 * self.data[idx*c+i+cutoff*c*c] / i_votes
         return idx_votes / d
     
-    def find_one_winner(self, already_elected, seats):
+    def get_next_winner(self, already_elected, seats):
         idx = []
         q = 1.0 * self.votes / seats
         for cutoff in range(4, -1, -1):
@@ -36,21 +36,21 @@ class Tensor(object):
             for i in range(self.candidates):
                 if i in already_elected:
                     continue
-                if cutoff == 0 or self.get(i, already_elected, cutoff - 1) >= q:
-                    cur = self.get(i, already_elected, cutoff)
+                if cutoff == 0 or self.get_score(i, already_elected, cutoff - 1) >= q:
+                    cur = self.get_score(i, already_elected, cutoff)
                     if val == cur:
                         idx.append(i)
                     elif val < cur:
                         val = cur
                         idx = [i]
             if idx:
-                for i in range(cutoff - 1, -1, -1):
+                for i in range(cutoff + 1, 5):
                     if len(idx) == 1:
                         break
                     idx2 = []
                     val = -1.0
                     for j in idx:
-                        cur = self.get(j, already_elected, i)
+                        cur = self.get_score(j, already_elected, i)
                         if val == cur:
                             idx2.append(j)
                         elif val < cur:
@@ -60,15 +60,15 @@ class Tensor(object):
                 break
         return idx[0]
     
-    def find_winners(self, seats):
+    def get_winners(self, seats):
         w = []
         for i in range(seats):
-            w.append(self.find_one_winner(w, seats))
+            w.append(self.get_next_winner(w, seats))
         return w
 
 t = Tensor(3)
-t.add([5,0,3])
-t.add([2,1,0])
-t.add([1,3,4])
-t.add([0,5,0])
-w = t.find_winners(2)
+t.add_ballot([5,0,3])
+t.add_ballot([2,1,0])
+t.add_ballot([1,3,4])
+t.add_ballot([0,5,0])
+w = t.get_winners(2)
