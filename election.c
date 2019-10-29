@@ -9,7 +9,9 @@ typedef struct {
 
 Tensor* new_tensor(int c) {
     Tensor* t = malloc(sizeof *t);
+    t->candidates = c;
     t->data = malloc(5*c*c * sizeof *t->data);
+    t->votes = 0;
     return t;
 }
 
