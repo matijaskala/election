@@ -29,8 +29,9 @@ function get_score(tensor, candidate, already_elected, cutoff)
 end
 
 function get_cutoff(tensor, Q, already_elected)
-    for cutoff in 5:-1:2
-        for a in 1:size(tensor.data)[1]
+    dim = size(tensor.data)
+    for cutoff in dim[3]:-1:2
+        for a in 1:dim[1]
             if a in already_elected
                 continue
             end
@@ -43,10 +44,11 @@ function get_cutoff(tensor, Q, already_elected)
 end
 
 function get_next_winner(tensor, Q, already_elected)
+    dim = size(tensor.data)
     idx = zeros(Int32, 0)
-    for cutoff in get_cutoff(tensor, Q, already_elected):5
+    for cutoff in get_cutoff(tensor, Q, already_elected):dim[3]
         if size(idx) == 0
-            for a in 1:size(tensor.data)[1]
+            for a in 1:dim[1]
                 if a in already_elected
                     continue
                 end
