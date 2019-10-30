@@ -30,7 +30,10 @@ end
 
 function get_cutoff(tensor, Q, already_elected)
     for cutoff in 5:-1:2
-        for a in already_elected
+        for a in 1:size(tensor.data)[1]
+            if a in already_elected
+                continue
+            end
             if get_score(tensor, a, already_elected, cutoff-1) >= Q
                 return cutoff
             end
@@ -44,7 +47,12 @@ function get_next_winner(tensor, Q, already_elected)
     for cutoff in get_cutoff(tensor, Q, already_elected):5
         if size(idx) == 0
             for a in 1:size(tensor.data)[1]
-                append!(idx, a)
+                if a in already_elected
+                    continue
+                end
+                if cutoff == 1 || get_score(tensor, a, already_elected, cutoff-1) >= Q
+                    append!(idx, a)
+                end
             end
         elseif size(idx) == 1
             break

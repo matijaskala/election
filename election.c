@@ -45,10 +45,17 @@ double get_score(Tensor* t, int idx, int already_elected_length, int* already_el
 }
 
 uint8_t get_cutoff(Tensor* t, double Q, int already_elected_length, int* already_elected) {
-    for (uint8_t i = 4; i > 0; i--)
-        for (int j = 0; j < already_elected_length; j++)
-            if (get_score(t, already_elected[j], already_elected_length, already_elected, i-1) >= Q)
-                return i;
+    for (uint8_t cutoff = 4; cutoff > 0; cutoff--)
+        for (int i = 0; i < t->candidates; i++) {
+            int skip = 0;
+            for (int j = 0; j < already_elected_length; j++)
+                if (already_elected[j] == i)
+                    skip = 1;
+            if (skip)
+                continue;
+            if (get_score(t, i, already_elected_length, already_elected, cutoff-1) >= Q)
+                return cutoff;
+        }
     return 0;
 }
 
@@ -57,8 +64,16 @@ int get_next_winner(Tensor* t, double Q, int already_elected_length, int* alread
     idx[0] = -1;
     for (uint8_t i = get_cutoff(t, Q, already_elected_length, already_elected); i < 5; i++) {
         if (idx[0] == -1)
-            for (int j = 0; j < t->candidates; j++)
-                idx[j] = j;
+            for (int j = 0; j < t->candidates; j++) {
+                int skip = 0;
+                for (int k = 0; k < already_elected_length; k++)
+                    if (already_elected[k] == j)
+                        skip = 1;
+                if (skip)
+                    continue;
+                if (i == 0 || get_score(t, j, already_elected_length, already_elected, i-1) >= Q)
+                    idx[j] = j;
+            }
         else if (idx[1] == -1)
             break;
         idx[t->candidates] = -1;
