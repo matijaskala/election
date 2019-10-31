@@ -20,7 +20,7 @@ end
 function get_score(tensor, candidate, already_elected, cutoff)
     d = 1.0
     for a in already_elected
-        if tensor.data[a, a, cutoff]
+        if tensor.data[a, a, cutoff] == 0
             return 0.0
         end
         d += tensor.data[candidate, a, cutoff] / tensor.data[a, a, cutoff]
@@ -45,9 +45,9 @@ end
 
 function get_next_winner(tensor, Q, already_elected)
     dim = size(tensor.data)
-    idx = zeros(Int32, 0)
+    idx = Int32[]
     for cutoff in get_cutoff(tensor, Q, already_elected):dim[3]
-        if size(idx) == 0
+        if size(idx)[1] == 0
             for a in 1:dim[1]
                 if a in already_elected
                     continue
@@ -56,11 +56,11 @@ function get_next_winner(tensor, Q, already_elected)
                     append!(idx, a)
                 end
             end
-        elseif size(idx) == 1
+        elseif size(idx)[1] == 1
             break
         end
         val = -1.0
-        idx2 = zeros(Int32, 0)
+        idx2 = Int32[]
         for a in idx
             cur = get_score(tensor, a, already_elected, cutoff)
             if cur == val
