@@ -67,7 +67,7 @@ function get_next_winner(tensor, Q, already_elected)
                 append!(idx2, a)
             elseif cur > val
                 val = cur
-                idx2 = zeros(Int32, 0)
+                idx2 = Int32[]
                 append!(idx2, a)
             end
         end
@@ -77,7 +77,7 @@ function get_next_winner(tensor, Q, already_elected)
 end
 
 function get_winners(tensor, W)
-    r = zeros(Int32, 0)
+    r = Int32[]
     for n in 1:W
         append!(r, get_next_winner(tensor, tensor.votes / W, r))
     end
