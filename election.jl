@@ -25,7 +25,7 @@ function get_score(tensor, candidate, already_elected, cutoff)
         end
         d += tensor.data[candidate, a, cutoff] / tensor.data[a, a, cutoff]
     end
-    return tensor.data[candidate, candidate, cutoff]
+    return tensor.data[candidate, candidate, cutoff] / d
 end
 
 function get_cutoff(tensor, Q, already_elected)
