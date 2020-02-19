@@ -132,12 +132,12 @@ class Tensor {
 					idx2[0] = idx[i];
 				}
 			}
-			delete idx;
+			delete[] idx;
 			idx = idx2;
 		}
 		auto r = idx[0];
-		delete idx;
-		delete S;
+		delete[] idx;
+		delete[] S;
 		return r;
 	}
 
@@ -184,12 +184,12 @@ class Tensor {
 					idx2[0] = idx[i];
 				}
 			}
-			delete idx;
+			delete[] idx;
 			idx = idx2;
 		}
 		auto r = idx[0];
-		delete idx;
-		delete S;
+		delete[] idx;
+		delete[] S;
 		return r;
 	}
 
