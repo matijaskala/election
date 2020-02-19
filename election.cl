@@ -1,3 +1,9 @@
+/**
+ *  @brief  Add ballot to score tensor
+ *  @param  C  Number of candidates
+ *  @param  T  Tensor of scores
+ *  @param  B  Scores on the ballot
+ */
 __kernel void add_ballot(int C,
                          __global unsigned long long int *T,
                          __global unsigned char *B)
@@ -8,6 +14,14 @@ __kernel void add_ballot(int C,
         T[get_global_id(0)]++;
 }
 
+/**
+ *  @brief  Calculate scores for all possible pairs of candidates
+ *  @param  C  Number of candidates
+ *  @param  T  Tensor of input scores
+ *  @param  S  Matrix of output scores
+ *  @param  A_length  Number of already elected candidates
+ *  @param  A  List of already elected candidates
+ */
 __kernel void calculate_scores (int C,
                                 __global unsigned long long *T,
                                 __global double *S,
@@ -27,11 +41,11 @@ __kernel void calculate_scores (int C,
         unsigned long long Vi = T[k*C*C + A[i]*C + A[i]];
         if (Vi == 0)
             return;
-        Dx = 1.0 * T[k*C*C + x*C + A[i]] / Vi;
-        Dy = 1.0 * T[k*C*C + y*C + A[i]] / Vi;
+        Dx += 1.0 * T[k*C*C + x*C + A[i]] / Vi;
+        Dy += 1.0 * T[k*C*C + y*C + A[i]] / Vi;
+    }
     if (x == y)
         S[get_global_id(0)] = 1.0 / (Dx / Vx);
     else
         S[get_global_id(0)] = 2.0 / (Dx / Vx + Dy / Vy + 1.0 * T[get_global_id(0)] / (Vx * Vy));
-    }
 }
